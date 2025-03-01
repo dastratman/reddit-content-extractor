@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Reddit Content Extractor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Reddit Content Extractor</h1>
+            <p>Extract Reddit content in Markdown for LLM summarization</p>
+        </div>
+
+        <div class="spinner hidden" id="spinner"></div>
+
+        <div class="main-content">
+            <div class="options">
+                <h2>Content Options</h2>
+                <label class="checkbox">
+                    <input type="checkbox" id="includeTitle" checked>
+                    <span>Include post title</span>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="includeMetadata" checked>
+                    <span>Include metadata (subreddit, date, score)</span>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="includeOP" checked>
+                    <span>Include original post</span>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="includeMedia" checked>
+                    <span>Include media references</span>
+                </label>
+                <label class="checkbox">
+                    <input type="checkbox" id="includeComments" checked>
+                    <span>Include comments</span>
+                </label>
+
+                <h2>Comment Options</h2>
+                <div class="option-row">
+                    <label>Comment depth:
+                        <select id="commentDepth">
+                            <option value="1">1 level</option>
+                            <option value="2">2 levels</option>
+                            <option value="3" selected>3 levels</option>
+                            <option value="5">5 levels</option>
+                            <option value="10">10 levels</option>
+                            <option value="0">All levels</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="option-row">
+                    <label>Comment limit:
+                        <select id="commentLimit">
+                            <option value="10">10 comments</option>
+                            <option value="25">25 comments</option>
+                            <option value="50" selected>50 comments</option>
+                            <option value="100">100 comments</option>
+                            <option value="250">250 comments</option>
+                            <option value="0">All comments</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="option-row">
+                    <label>Sort by:
+                        <select id="commentSort">
+                            <option value="top" selected>Top</option>
+                            <option value="new">New</option>
+                            <option value="controversial">Controversial</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="extractBtn" class="primary">Extract Content</button>
+                <button id="copyBtn" disabled class="secondary">Copy to Clipboard</button>
+                <button id="downloadBtn" disabled class="secondary">Download Markdown</button>
+            </div>
+
+            <div class="preview-section hidden" id="previewSection">
+                <h2>Content Preview <span id="contentStats"></span></h2>
+                <div id="contentPreview" class="preview-content"></div>
+            </div>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+    <script src="utils.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

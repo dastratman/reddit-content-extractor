@@ -1,0 +1,167 @@
+body {
+    width: 400px;
+    padding: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #222;
+    margin: 0;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .header {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+  }
+  
+  h1 {
+    font-size: 18px;
+    margin: 0;
+    color: #0079d3;
+  }
+  
+  h2 {
+    font-size: 14px;
+    margin: 8px 0;
+    color: #444;
+  }
+  
+  .header p {
+    margin: 6px 0 0 0;
+    font-size: 13px;
+    color: #666;
+  }
+  
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .option-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  
+  .checkbox input[type="checkbox"] {
+    accent-color: #0079d3;
+  }
+  
+  label {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  select {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    background-color: white;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  
+  button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+    flex: 1;
+  }
+  
+  button.primary {
+    background: #0079d3;
+    color: white;
+  }
+  
+  button.secondary {
+    background: #f5f5f5;
+    color: #0079d3;
+    border: 1px solid #0079d3;
+  }
+  
+  button:hover {
+    opacity: 0.9;
+  }
+  
+  button:disabled {
+    background: #cccccc;
+    color: #666;
+    border-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  .status {
+    font-size: 13px;
+    color: #555;
+    padding: 8px 0;
+    min-height: 20px;
+    border-top: 1px solid #eee;
+    margin-top: auto;
+  }
+  
+  .preview-section {
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+    margin-top: 10px;
+  }
+  
+  .preview-content {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12px;
+    font-family: monospace;
+    background: #f9f9f9;
+    white-space: pre-wrap;
+  }
+  
+  #contentStats {
+    font-size: 12px;
+    font-weight: normal;
+    color: #666;
+  }
+  
+  .spinner {
+    border: 2px solid rgba(0, 121, 211, 0.2);
+    border-top: 2px solid #0079d3;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .hidden {
+    display: none;
+  }

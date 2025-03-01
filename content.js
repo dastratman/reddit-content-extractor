@@ -20,7 +20,9 @@ if (isRedditThread) {
       return Array.from(mutation.addedNodes).some(node => {
         return node.nodeType === 1 && 
               (node.classList.contains('Comment') || 
-               node.querySelector('[data-testid="comment"]'));
+               node.querySelector('[data-testid="comment"]') ||
+               node.classList.contains('sitetable') ||
+               node.classList.contains('comment'));
       });
     });
     

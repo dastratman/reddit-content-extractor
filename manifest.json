@@ -9,6 +9,9 @@
         "clipboardWrite",
         "storage"
     ],
+    "host_permissions": [
+        "*://*.reddit.com/*"
+    ],
     "action": {
         "default_popup": "popup.html",
         "default_icon": {

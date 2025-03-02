@@ -12,134 +12,154 @@
     <div class="container">
         <div class="header">
             <h1>Reddit Content Extractor</h1>
-            <p>Extract Reddit content in Markdown for LLM summarization</p>
         </div>
 
-        <div class="spinner hidden" id="spinner"></div>
-
         <div class="main-content">
-            <div class="options-section">
-                <h2>Content Options</h2>
-                <div class="option-group">
-                    <label class="checkbox">
-                        <input type="checkbox" id="includeTitle" checked>
-                        <span>Include post title</span>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="includeMetadata" checked>
-                        <span>Include metadata (subreddit, date, score)</span>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="includeOP" checked>
-                        <span>Include original post</span>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="includeMedia" checked>
-                        <span>Include media references</span>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" id="includeComments" checked>
-                        <span>Include comments</span>
-                    </label>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>Content Options</span>
+                        <button type="button" class="toggle-btn" onclick="return false;">+</button>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="option-group">
+                            <div class="checkbox-row">
+                                <label class="checkbox small">
+                                    <input type="checkbox" id="includeTitle" checked>
+                                    <span>Title</span>
+                                </label>
+                                <label class="checkbox small">
+                                    <input type="checkbox" id="includeMetadata" checked>
+                                    <span>Metadata</span>
+                                </label>
+                                <label class="checkbox small">
+                                    <input type="checkbox" id="includeOP" checked>
+                                    <span>Post</span>
+                                </label>
+                                <label class="checkbox small">
+                                    <input type="checkbox" id="includeMedia" checked>
+                                    <span>Media</span>
+                                </label>
+                                <label class="checkbox small">
+                                    <input type="checkbox" id="includeComments" checked>
+                                    <span>Comments</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <h2>Comment Options</h2>
-                <div class="option-group">
-                    <div class="option-row">
-                        <label>Comment depth:
-                            <select id="commentDepth">
-                                <option value="1">1 level</option>
-                                <option value="2">2 levels</option>
-                                <option value="3" selected>3 levels</option>
-                                <option value="5">5 levels</option>
-                                <option value="10">10 levels</option>
-                                <option value="0">All levels</option>
-                            </select>
-                        </label>
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>Comment Options</span>
+                        <button type="button" class="toggle-btn" onclick="return false;">+</button>
                     </div>
+                    <div class="accordion-content">
+                        <div class="option-grid">
+                            <div class="option-column">
+                                <label>Depth:
+                                    <select id="commentDepth" class="compact-select">
+                                        <option value="1">1 level</option>
+                                        <option value="2">2 levels</option>
+                                        <option value="3" selected>3 levels</option>
+                                        <option value="5">5 levels</option>
+                                        <option value="10">10 levels</option>
+                                        <option value="0">All levels</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="option-column">
+                                <label>Limit:
+                                    <select id="commentLimit" class="compact-select">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50" selected>50</option>
+                                        <option value="100">100</option>
+                                        <option value="250">250</option>
+                                        <option value="0">All</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="option-column">
+                                <label>Sort:
+                                    <select id="commentSort" class="compact-select">
+                                        <option value="best" selected>Best</option>
+                                        <option value="top">Top</option>
+                                        <option value="new">New</option>
+                                        <option value="controversial">Controversial</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
 
-                    <div class="option-row">
-                        <label>Comment limit:
-                            <select id="commentLimit">
-                                <option value="10">10 comments</option>
-                                <option value="25">25 comments</option>
-                                <option value="50" selected>50 comments</option>
-                                <option value="100">100 comments</option>
-                                <option value="250">250 comments</option>
-                                <option value="0">All comments</option>
-                            </select>
-                        </label>
-                    </div>
+                        <div class="option-row">
+                            <label>Min score:
+                                <input type="number" id="commentScoreThreshold" value="1" min="-100" max="10000"
+                                    class="number-input">
+                            </label>
+                            <span class="tooltip"
+                                title="Comments with scores below this threshold will be excluded">?</span>
+                        </div>
 
-                    <div class="option-row">
-                        <label>Sort by:
-                            <select id="commentSort">
-                                <option value="best" selected>Best</option>
-                                <option value="top">Top</option>
-                                <option value="new">New</option>
-                                <option value="controversial">Controversial</option>
-                            </select>
-                        </label>
-                    </div>
-
-                    <div class="option-row">
-                        <label>Minimum comment score:
-                            <input type="number" id="commentScoreThreshold" value="1" min="-100" max="10000"
-                                class="number-input">
-                        </label>
-                        <span class="tooltip"
-                            title="Comments with scores below this threshold will be excluded">(info)</span>
-                    </div>
-
-                    <label class="checkbox">
-                        <input type="checkbox" id="extractTopDiscussions">
-                        <span>Extract only top discussions</span>
-                        <span class="tooltip"
-                            title="Identifies and extracts the most engaging conversation threads">(info)</span>
-                    </label>
-
-                    <div class="option-row" id="topDiscussionsOptions">
-                        <label>Number of threads:
-                            <select id="topDiscussionsCount">
+                        <div class="option-row">
+                            <label class="checkbox">
+                                <input type="checkbox" id="extractTopDiscussions">
+                                <span>Extract top discussions</span>
+                                <span class="tooltip"
+                                    title="Identifies and extracts the most engaging conversation threads">?</span>
+                            </label>
+                            <select id="topDiscussionsCount" class="compact-select">
                                 <option value="3">3 threads</option>
                                 <option value="5" selected>5 threads</option>
                                 <option value="10">10 threads</option>
                                 <option value="15">15 threads</option>
                             </select>
-                        </label>
+                        </div>
                     </div>
                 </div>
 
-                <h2>Export Format</h2>
-                <div class="format-options">
-                    <label class="radio">
-                        <input type="radio" name="exportFormat" value="markdown" checked>
-                        <span>Markdown</span>
-                    </label>
-                    <label class="radio">
-                        <input type="radio" name="exportFormat" value="html">
-                        <span>HTML</span>
-                    </label>
-                    <label class="radio">
-                        <input type="radio" name="exportFormat" value="plaintext">
-                        <span>Plain Text</span>
-                    </label>
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>Export Format</span>
+                        <button type="button" class="toggle-btn" onclick="return false;">+</button>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="format-options">
+                            <label class="radio">
+                                <input type="radio" name="exportFormat" value="markdown" checked>
+                                <span>Markdown</span>
+                            </label>
+                            <label class="radio">
+                                <input type="radio" name="exportFormat" value="html">
+                                <span>HTML</span>
+                            </label>
+                            <label class="radio">
+                                <input type="radio" name="exportFormat" value="plaintext">
+                                <span>Plain Text</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="action-buttons">
                 <button id="extractBtn" class="primary">Extract Content</button>
-                <button id="copyBtn" disabled class="secondary">Copy to Clipboard</button>
+                <button id="copyBtn" disabled class="secondary">Copy</button>
                 <button id="downloadBtn" disabled class="secondary">Download</button>
             </div>
 
+            <div class="preview-toggle">
+                <button id="togglePreview">Show Preview</button>
+            </div>
+
             <div class="preview-section hidden" id="previewSection">
-                <h2>Content Preview <span id="contentStats"></span></h2>
                 <div id="contentPreview" class="preview-content"></div>
+                <div id="contentStats" class="stats"></div>
             </div>
         </div>
 
-        <div class="status" id="status"></div>
+        <div class="status" id="status">Ready to extract content from Reddit</div>
+        <div class="spinner hidden" id="spinner"></div>
     </div>
     <script src="popup.js"></script>
 </body>

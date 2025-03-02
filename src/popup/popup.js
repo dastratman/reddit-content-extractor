@@ -56,7 +56,74 @@ document.addEventListener('DOMContentLoaded', function () {
     const contentPreview = document.getElementById('contentPreview');
     const contentStats = document.getElementById('contentStats');
     const extractTopDiscussions = document.getElementById('extractTopDiscussions');
-    const topDiscussionsOptions = document.getElementById('topDiscussionsOptions');
+    const togglePreviewBtn = document.getElementById('togglePreview');
+
+    // Accordion functionality - simplified and robust
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        console.log('Adding click handler to header:', header.textContent.trim());
+
+        // Use onclick instead of addEventListener for more direct binding
+        header.onclick = function () {
+            console.log('Header clicked:', this.textContent.trim());
+
+            const accordionItem = this.parentElement;
+            const wasActive = accordionItem.classList.contains('active');
+
+            // First remove active class from all items
+            document.querySelectorAll('.accordion-item').forEach(item => {
+                item.classList.remove('active');
+                const btn = item.querySelector('.toggle-btn');
+                if (btn) btn.textContent = '+';
+            });
+
+            // Then toggle the clicked one if it wasn't already active
+            if (!wasActive) {
+                accordionItem.classList.add('active');
+                const btn = accordionItem.querySelector('.toggle-btn');
+                if (btn) btn.textContent = '×';
+                console.log('Accordion opened');
+            } else {
+                console.log('Accordion closed (was active)');
+            }
+
+            return false; // Prevent event bubbling
+        };
+    });
+
+    // Manually set the first item as active
+    const firstAccordion = document.querySelector('.accordion-item');
+    if (firstAccordion) {
+        console.log('Setting first accordion as active');
+        firstAccordion.classList.add('active');
+        const firstBtn = firstAccordion.querySelector('.toggle-btn');
+        if (firstBtn) firstBtn.textContent = '×';
+    } else {
+        console.error('No accordion items found!');
+    }
+
+    // Open first accordion by default
+    document.querySelector('.accordion-item').classList.add('active');
+    document.querySelector('.accordion-item .toggle-btn').textContent = '×';
+
+    // Preview toggle - use the already declared previewSection variable
+    togglePreviewBtn.addEventListener('click', function () {
+        const isHidden = previewSection.classList.contains('hidden');
+        if (isHidden) {
+            previewSection.classList.remove('hidden');
+            togglePreviewBtn.textContent = 'Hide Preview';
+        } else {
+            previewSection.classList.add('hidden');
+            togglePreviewBtn.textContent = 'Show Preview';
+        }
+    });
+
+    // Initialize top discussions count visibility
+    document.getElementById('topDiscussionsCount').style.display =
+        document.getElementById('extractTopDiscussions').checked ? 'inline-block' : 'none';
+
+    // Initialize UI state
+    copyBtn.disabled = true;
+    downloadBtn.disabled = true;
 
     // Initialize UI state
     copyBtn.disabled = true;
@@ -94,7 +161,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (formatRadio) formatRadio.checked = true;
 
         // Show/hide dependent options
-        topDiscussionsOptions.style.display = items.extractTopDiscussions ? 'block' : 'none';
+        document.getElementById('topDiscussionsCount').style.display =
+            items.extractTopDiscussions ? 'inline-block' : 'none';
     });
 
     // Check if we're on a Reddit thread page
@@ -122,8 +190,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Toggle visibility of dependent options
-    extractTopDiscussions.addEventListener('change', function () {
-        topDiscussionsOptions.style.display = this.checked ? 'block' : 'none';
+    document.getElementById('extractTopDiscussions').addEventListener('change', function () {
+        document.getElementById('topDiscussionsCount').style.display =
+            this.checked ? 'inline-block' : 'none';
     });
 
     // Save settings when changed

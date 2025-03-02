@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Reddit Content Extractor for LLM",
+    "name": "Reddit Content Extractor",
     "version": "1.0.0",
     "description": "Extract Reddit threads in Markdown format",
     "author": "Daniel Stratman",

@@ -12,27 +12,27 @@ if (isRedditThread) {
     url: window.location.href,
     isNewReddit: isNewReddit
   });
-  
+
   // Add MutationObserver to detect when Reddit loads more comments
   // This helps with extracting more content when user expands comments
   const observer = new MutationObserver(mutations => {
     const hasNewComments = mutations.some(mutation => {
       return Array.from(mutation.addedNodes).some(node => {
-        return node.nodeType === 1 && 
-              (node.classList.contains('Comment') || 
-               node.querySelector('[data-testid="comment"]') ||
-               node.classList.contains('sitetable') ||
-               node.classList.contains('comment'));
+        return node.nodeType === 1 &&
+          (node.classList.contains('Comment') ||
+            node.querySelector('[data-testid="comment"]') ||
+            node.classList.contains('sitetable') ||
+            node.classList.contains('comment'));
       });
     });
-    
+
     if (hasNewComments) {
       chrome.runtime.sendMessage({
         action: "commentsUpdated"
       });
     }
   });
-  
+
   // Start observing
   observer.observe(document.body, {
     childList: true,

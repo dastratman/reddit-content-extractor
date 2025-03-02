@@ -1,3 +1,49 @@
+// Import CSS
+import './styles.css';
+
+// Utility functions
+const utils = {
+    // Sanitize filename
+    sanitizeFilename: function (name) {
+        return name
+            .replace(/[^a-z0-9]/gi, '_')
+            .toLowerCase()
+            .replace(/_+/g, '_')
+            .substring(0, 50);
+    },
+
+    // Format conversion utilities
+    convertToHtml: function (markdownContent) {
+        // Basic Markdown to HTML conversion
+        return markdownContent
+            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">')
+            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+            .replace(/^- (.*$)/gm, '<li>$1</li>')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/^>/gm, '<blockquote>')
+            .replace(/```([^`]*?)```/g, '<pre><code>\$1</code></pre>');
+    },
+
+    convertToPlainText: function (markdownContent) {
+        // Remove Markdown formatting
+        return markdownContent
+            .replace(/^# (.*$)/gm, '\$1\n')
+            .replace(/^## (.*$)/gm, '\$1\n')
+            .replace(/^### (.*$)/gm, '\$1\n')
+            .replace(/\*\*(.*?)\*\*/g, '\$1')
+            .replace(/\*(.*?)\*/g, '\$1')
+            .replace(/!$$(.*?)$$$(.*?)$/g, '[Image: \$1]')
+            .replace(/$$(.*?)$$$(.*?)$/g, '\$1 (\$2)')
+            .replace(/^- (.*$)/gm, '- \$1')
+            .replace(/^>/gm, '> ');
+    }
+};
+
 let extractedContent = '';
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -9,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const previewSection = document.getElementById('previewSection');
     const contentPreview = document.getElementById('contentPreview');
     const contentStats = document.getElementById('contentStats');
+    const extractTopDiscussions = document.getElementById('extractTopDiscussions');
+    const topDiscussionsOptions = document.getElementById('topDiscussionsOptions');
 
     // Initialize UI state
     copyBtn.disabled = true;
@@ -23,7 +71,11 @@ document.addEventListener('DOMContentLoaded', function () {
         'includeComments': true,
         'commentDepth': 3,
         'commentLimit': 50,
-        'commentSort': 'best'
+        'commentSort': 'best',
+        'commentScoreThreshold': 1,
+        'extractTopDiscussions': false,
+        'topDiscussionsCount': 5,
+        'exportFormat': 'markdown'
     }, function (items) {
         document.getElementById('includeTitle').checked = items.includeTitle;
         document.getElementById('includeMetadata').checked = items.includeMetadata;
@@ -33,16 +85,45 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('commentDepth').value = items.commentDepth;
         document.getElementById('commentLimit').value = items.commentLimit;
         document.getElementById('commentSort').value = items.commentSort;
+        document.getElementById('commentScoreThreshold').value = items.commentScoreThreshold;
+        document.getElementById('extractTopDiscussions').checked = items.extractTopDiscussions;
+        document.getElementById('topDiscussionsCount').value = items.topDiscussionsCount;
+
+        // Set export format
+        const formatRadio = document.querySelector(`input[name="exportFormat"][value="${items.exportFormat}"]`);
+        if (formatRadio) formatRadio.checked = true;
+
+        // Show/hide dependent options
+        topDiscussionsOptions.style.display = items.extractTopDiscussions ? 'block' : 'none';
     });
 
     // Check if we're on a Reddit thread page
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        // Add error handling for missing tabs
+        if (!tabs || tabs.length === 0) {
+            statusDiv.innerHTML = "⚠️ Unable to access current tab.";
+            extractBtn.disabled = true;
+            return;
+        }
+
         const url = tabs[0].url;
+        // Add null/undefined check
+        if (!url) {
+            statusDiv.innerHTML = "⚠️ Cannot access page URL.";
+            extractBtn.disabled = true;
+            return;
+        }
+
         if (!url.match(/reddit\.com\/r\/[^\/]+\/comments\//)) {
             statusDiv.innerHTML = "⚠️ This is not a Reddit thread page.";
             extractBtn.disabled = true;
             return;
         }
+    });
+
+    // Toggle visibility of dependent options
+    extractTopDiscussions.addEventListener('change', function () {
+        topDiscussionsOptions.style.display = this.checked ? 'block' : 'none';
     });
 
     // Save settings when changed
@@ -55,7 +136,11 @@ document.addEventListener('DOMContentLoaded', function () {
             'includeComments': document.getElementById('includeComments').checked,
             'commentDepth': document.getElementById('commentDepth').value,
             'commentLimit': document.getElementById('commentLimit').value,
-            'commentSort': document.getElementById('commentSort').value
+            'commentSort': document.getElementById('commentSort').value,
+            'commentScoreThreshold': parseInt(document.getElementById('commentScoreThreshold').value) || 1,
+            'extractTopDiscussions': document.getElementById('extractTopDiscussions').checked,
+            'topDiscussionsCount': document.getElementById('topDiscussionsCount').value,
+            'exportFormat': document.querySelector('input[name="exportFormat"]:checked').value
         });
     };
 
@@ -116,7 +201,10 @@ document.addEventListener('DOMContentLoaded', function () {
             includeComments: document.getElementById('includeComments').checked,
             commentDepth: parseInt(document.getElementById('commentDepth').value),
             commentLimit: parseInt(document.getElementById('commentLimit').value),
-            commentSort: document.getElementById('commentSort').value
+            commentSort: document.getElementById('commentSort').value,
+            commentScoreThreshold: parseInt(document.getElementById('commentScoreThreshold').value) || 1,
+            extractTopDiscussions: document.getElementById('extractTopDiscussions').checked,
+            topDiscussionsCount: parseInt(document.getElementById('topDiscussionsCount').value)
         };
 
         // Save settings
@@ -144,8 +232,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Copy button handler
     copyBtn.addEventListener('click', function () {
-        navigator.clipboard.writeText(extractedContent).then(function () {
-            statusDiv.innerHTML = "✅ Content copied to clipboard!";
+        const format = document.querySelector('input[name="exportFormat"]:checked').value;
+        let contentToCopy = extractedContent;
+
+        if (format === 'html') {
+            contentToCopy = utils.convertToHtml(extractedContent);
+        } else if (format === 'plaintext') {
+            contentToCopy = utils.convertToPlainText(extractedContent);
+        }
+
+        navigator.clipboard.writeText(contentToCopy).then(function () {
+            statusDiv.innerHTML = `✅ Content copied to clipboard as ${format.toUpperCase()}!`;
         }, function () {
             statusDiv.innerHTML = "❌ Failed to copy to clipboard.";
         });
@@ -153,11 +250,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Download button handler
     downloadBtn.addEventListener('click', function () {
-        const blob = new Blob([extractedContent], { type: 'text/markdown' });
+        const format = document.querySelector('input[name="exportFormat"]:checked').value;
+        let contentToDownload = extractedContent;
+        let fileExtension = 'md';
+        let mimeType = 'text/markdown';
+
+        if (format === 'html') {
+            contentToDownload = utils.convertToHtml(extractedContent);
+            fileExtension = 'html';
+            mimeType = 'text/html';
+        } else if (format === 'plaintext') {
+            contentToDownload = utils.convertToPlainText(extractedContent);
+            fileExtension = 'txt';
+            mimeType = 'text/plain';
+        }
+
+        const blob = new Blob([contentToDownload], { type: mimeType });
         const url = URL.createObjectURL(blob);
 
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            const fileName = sanitizeFilename(tabs[0].title) + ".md";
+            const fileName = utils.sanitizeFilename(tabs[0].title) + `.${fileExtension}`;
 
             const a = document.createElement('a');
             a.href = url;
@@ -165,18 +277,9 @@ document.addEventListener('DOMContentLoaded', function () {
             a.click();
 
             URL.revokeObjectURL(url);
-            statusDiv.innerHTML = "✅ Content downloaded as Markdown!";
+            statusDiv.innerHTML = `✅ Content downloaded as ${format.toUpperCase()}!`;
         });
     });
-
-    // Helper function to sanitize filenames
-    function sanitizeFilename(name) {
-        return name
-            .replace(/[^a-z0-9]/gi, '_')
-            .toLowerCase()
-            .replace(/_+/g, '_')
-            .substring(0, 50);
-    }
 });
 
 function extractRedditContent(options) {
@@ -260,15 +363,30 @@ function extractRedditContent(options) {
             if (options.includeComments) {
                 output += "## Comments\n\n";
 
+                let commentsToProcess = [...commentsData];
+
+                // Use top discussions if that option is enabled
+                if (options.extractTopDiscussions) {
+                    const topDiscussions = extractTopDiscussions(commentsData, options);
+                    output += `*Showing the top ${topDiscussions.length} discussion threads based on engagement*\n\n`;
+
+                    // Replace with only the top discussion root comments
+                    commentsToProcess = topDiscussions.map(discussion => {
+                        return {
+                            kind: 't1',
+                            data: discussion.rootComment
+                        };
+                    });
+                }
+
                 // Sort comments if needed
-                let sortedComments = [...commentsData];
                 if (options.commentSort === 'top' || options.commentSort === 'best') {
-                    sortedComments.sort((a, b) => {
+                    commentsToProcess.sort((a, b) => {
                         if (!a.data || !b.data) return 0;
                         return (b.data.score || 0) - (a.data.score || 0);
                     });
                 } else if (options.commentSort === 'new') {
-                    sortedComments.sort((a, b) => {
+                    commentsToProcess.sort((a, b) => {
                         if (!a.data || !b.data) return 0;
                         return (b.data.created_utc || 0) - (a.data.created_utc || 0);
                     });
@@ -276,13 +394,12 @@ function extractRedditContent(options) {
 
                 // Limit the number of top-level comments if specified
                 if (options.commentLimit > 0) {
-                    sortedComments = sortedComments.slice(0, options.commentLimit);
+                    commentsToProcess = commentsToProcess.slice(0, options.commentLimit);
                 }
 
                 // Process each comment thread
-                for (const commentObj of sortedComments) {
+                for (const commentObj of commentsToProcess) {
                     if (commentObj.kind === 't1') { // t1 = comment
-                        // Define processComment here so it has access to output
                         processComment(commentObj.data, 0);
                     } else if (commentObj.kind === 'more') {
                         // "Load more comments" indicator
@@ -299,7 +416,6 @@ function extractRedditContent(options) {
             });
 
             // Helper function to process comments recursively
-            // IMPORTANT: Define this function here so it can access the 'output' variable
             function processComment(comment, depth) {
                 // Skip if beyond depth limit
                 if (options.commentDepth > 0 && depth >= options.commentDepth) {
@@ -309,6 +425,11 @@ function extractRedditContent(options) {
                 // Skip deleted/removed comments with no content
                 if ((comment.author === '[deleted]' || !comment.author) && !comment.body) {
                     return;
+                }
+
+                // Skip comments below score threshold
+                if (comment.score < options.commentScoreThreshold) {
+                    return; // Skip comments below threshold
                 }
 
                 // Add indentation and author info
@@ -355,6 +476,57 @@ function extractRedditContent(options) {
                         }
                     }
                 }
+            }
+
+            // Function to extract top discussions
+            function extractTopDiscussions(commentsData, options) {
+                // Score comments and their threads based on engagement metrics
+                const discussions = [];
+
+                for (const commentObj of commentsData) {
+                    if (commentObj.kind !== 't1') continue;
+
+                    const comment = commentObj.data;
+                    if (!comment || comment.score < options.commentScoreThreshold) continue;
+
+                    // Calculate engagement score
+                    // Factors: upvotes, number of replies, awards, comment length
+                    let engagementScore = comment.score;
+
+                    // Add score for replies if any
+                    if (comment.replies && comment.replies.data && comment.replies.data.children) {
+                        const replies = comment.replies.data.children;
+                        const replyCount = replies.filter(r => r.kind === 't1').length;
+                        engagementScore += replyCount * 2;
+
+                        // Add scores from child comments
+                        for (const replyObj of replies) {
+                            if (replyObj.kind === 't1') {
+                                engagementScore += Math.max(0, replyObj.data.score);
+                            }
+                        }
+                    }
+
+                    // Bonus points for longer comments (more substantial)
+                    if (comment.body) {
+                        engagementScore += Math.min(10, comment.body.length / 100);
+                    }
+
+                    // Bonus for awards
+                    if (comment.all_awardings) {
+                        engagementScore += comment.all_awardings.length * 5;
+                    }
+
+                    // Store the discussion thread with its score
+                    discussions.push({
+                        rootComment: comment,
+                        engagementScore: engagementScore
+                    });
+                }
+
+                // Sort by engagement score and take the top N
+                discussions.sort((a, b) => b.engagementScore - a.engagementScore);
+                return discussions.slice(0, options.topDiscussionsCount);
             }
         })
         .catch(error => {

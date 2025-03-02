@@ -3,6 +3,8 @@
 
 <head>
     <title>Reddit Content Extractor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -16,64 +18,111 @@
         <div class="spinner hidden" id="spinner"></div>
 
         <div class="main-content">
-            <div class="options">
+            <div class="options-section">
                 <h2>Content Options</h2>
-                <label class="checkbox">
-                    <input type="checkbox" id="includeTitle" checked>
-                    <span>Include post title</span>
-                </label>
-                <label class="checkbox">
-                    <input type="checkbox" id="includeMetadata" checked>
-                    <span>Include metadata (subreddit, date, score)</span>
-                </label>
-                <label class="checkbox">
-                    <input type="checkbox" id="includeOP" checked>
-                    <span>Include original post</span>
-                </label>
-                <label class="checkbox">
-                    <input type="checkbox" id="includeMedia" checked>
-                    <span>Include media references</span>
-                </label>
-                <label class="checkbox">
-                    <input type="checkbox" id="includeComments" checked>
-                    <span>Include comments</span>
-                </label>
+                <div class="option-group">
+                    <label class="checkbox">
+                        <input type="checkbox" id="includeTitle" checked>
+                        <span>Include post title</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="includeMetadata" checked>
+                        <span>Include metadata (subreddit, date, score)</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="includeOP" checked>
+                        <span>Include original post</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="includeMedia" checked>
+                        <span>Include media references</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="includeComments" checked>
+                        <span>Include comments</span>
+                    </label>
+                </div>
 
                 <h2>Comment Options</h2>
-                <div class="option-row">
-                    <label>Comment depth:
-                        <select id="commentDepth">
-                            <option value="1">1 level</option>
-                            <option value="2">2 levels</option>
-                            <option value="3" selected>3 levels</option>
-                            <option value="5">5 levels</option>
-                            <option value="10">10 levels</option>
-                            <option value="0">All levels</option>
-                        </select>
+                <div class="option-group">
+                    <div class="option-row">
+                        <label>Comment depth:
+                            <select id="commentDepth">
+                                <option value="1">1 level</option>
+                                <option value="2">2 levels</option>
+                                <option value="3" selected>3 levels</option>
+                                <option value="5">5 levels</option>
+                                <option value="10">10 levels</option>
+                                <option value="0">All levels</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <label>Comment limit:
+                            <select id="commentLimit">
+                                <option value="10">10 comments</option>
+                                <option value="25">25 comments</option>
+                                <option value="50" selected>50 comments</option>
+                                <option value="100">100 comments</option>
+                                <option value="250">250 comments</option>
+                                <option value="0">All comments</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <label>Sort by:
+                            <select id="commentSort">
+                                <option value="best" selected>Best</option>
+                                <option value="top">Top</option>
+                                <option value="new">New</option>
+                                <option value="controversial">Controversial</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="option-row">
+                        <label>Minimum comment score:
+                            <input type="number" id="commentScoreThreshold" value="1" min="-100" max="10000"
+                                class="number-input">
+                        </label>
+                        <span class="tooltip"
+                            title="Comments with scores below this threshold will be excluded">(info)</span>
+                    </div>
+
+                    <label class="checkbox">
+                        <input type="checkbox" id="extractTopDiscussions">
+                        <span>Extract only top discussions</span>
+                        <span class="tooltip"
+                            title="Identifies and extracts the most engaging conversation threads">(info)</span>
                     </label>
+
+                    <div class="option-row" id="topDiscussionsOptions">
+                        <label>Number of threads:
+                            <select id="topDiscussionsCount">
+                                <option value="3">3 threads</option>
+                                <option value="5" selected>5 threads</option>
+                                <option value="10">10 threads</option>
+                                <option value="15">15 threads</option>
+                            </select>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="option-row">
-                    <label>Comment limit:
-                        <select id="commentLimit">
-                            <option value="10">10 comments</option>
-                            <option value="25">25 comments</option>
-                            <option value="50" selected>50 comments</option>
-                            <option value="100">100 comments</option>
-                            <option value="250">250 comments</option>
-                            <option value="0">All comments</option>
-                        </select>
+                <h2>Export Format</h2>
+                <div class="format-options">
+                    <label class="radio">
+                        <input type="radio" name="exportFormat" value="markdown" checked>
+                        <span>Markdown</span>
                     </label>
-                </div>
-
-                <div class="option-row">
-                    <label>Sort by:
-                        <select id="commentSort">
-                            <option value="best" selected>Best</option>
-                            <option value="top">Top</option>
-                            <option value="new">New</option>
-                            <option value="controversial">Controversial</option>
-                        </select>
+                    <label class="radio">
+                        <input type="radio" name="exportFormat" value="html">
+                        <span>HTML</span>
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="exportFormat" value="plaintext">
+                        <span>Plain Text</span>
                     </label>
                 </div>
             </div>
@@ -81,7 +130,7 @@
             <div class="action-buttons">
                 <button id="extractBtn" class="primary">Extract Content</button>
                 <button id="copyBtn" disabled class="secondary">Copy to Clipboard</button>
-                <button id="downloadBtn" disabled class="secondary">Download Markdown</button>
+                <button id="downloadBtn" disabled class="secondary">Download</button>
             </div>
 
             <div class="preview-section hidden" id="previewSection">
@@ -92,7 +141,6 @@
 
         <div class="status" id="status"></div>
     </div>
-    <script src="utils.js"></script>
     <script src="popup.js"></script>
 </body>
 

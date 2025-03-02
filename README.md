@@ -1,7 +1,7 @@
 # Reddit Content Extractor
 
 <div align="center">
-  <img src="./screenshots/logo.png" alt="Reddit Content Extractor Logo" width="128" height="128">
+  <img src="./src/icons/icon128.png" alt="Reddit Content Extractor Logo" width="128" height="128">
   <h3>A Chrome extension that extracts Reddit threads in Markdown format for LLM processing</h3>
 </div>
 
@@ -15,10 +15,10 @@
 
 ## 📖 Overview
 
-Reddit Content Extractor for LLM is a Chrome extension that converts Reddit threads into clean, structured Markdown format suitable for input to Large Language Models (LLMs) like ChatGPT, Claude, or Llama. Extract the original post, comments, and metadata with a single click.
+Reddit Content Extractor is a Chrome extension that converts Reddit threads into clean, structured Markdown format suitable for input to Large Language Models (LLMs) like ChatGPT, Claude, or Gemini. Extract the original post, comments, and metadata with a single click.
 
 <div align="center">
-  <img src="./screenshots/screenshot.png" alt="Extension Screenshot" width="600">
+  <img src="./screenshots/content_options.png" alt="Extension Screenshot" width="600">
 </div>
 
 ## ✨ Features
@@ -44,7 +44,7 @@ Reddit Content Extractor for LLM is a Chrome extension that converts Reddit thre
 
 1. Clone this repository or download the ZIP file and extract it
    ```
-   git clone https://github.com/yourusername/reddit-content-extractor.git
+   git clone https://github.com/dastratman/reddit-content-extractor.git
    ```
 
 2. Open Chrome and navigate to `chrome://extensions/`
